@@ -29,8 +29,6 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
     float[] prevPressure;
     float currentPressure;
 
-    boolean resetPrevPressureFlag; //trueなら過去のデータを現在の測定値でクリア
-
     boolean isZeroed; //基準点の測定が済んだかどうか
     float refPressure; //基準点の気圧
     float temperature; //気温
@@ -88,8 +86,6 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
             return;
         }
         sensorManager.registerListener(this, sensores.get(0), SensorManager.SENSOR_DELAY_GAME);
-
-        resetPrevPressureFlag = true;
     }
 
     @Override
@@ -103,18 +99,14 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
 
     @Override
     public void onSensorChanged(SensorEvent e){
-        if(resetPrevPressureFlag){
-            for(int i = 0; i < filter_n; i++)prevPressure[i] = e.values[0];
-            resetPrevPressureFlag = false;
-        }
         System.arraycopy(prevPressure, 0, prevPressure, 1, filter_n - 1);
         prevPressure[0] = e.values[0];
 
         float sum = 0.0f;
         for(int i = 0; i < filter_n; i++) {
-            sum += prevPressure[i] * Math.pow(0.97f, i);
+            sum += prevPressure[i];
         }
-        currentPressure = sum / 33.3169f;
+        currentPressure = sum / filter_n;
         textPressure.setText(String.format("%.2f", currentPressure) + " hPa");
 
         if(isZeroed){ //基準点の測定が終わってたら高度を計算・表示
