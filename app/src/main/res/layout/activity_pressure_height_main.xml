@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Temparature"
+        android:text="Temperature"
         android:id="@+id/textView"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -24,6 +24,7 @@
         android:inputType="numberDecimal"
         android:text="20.0"
         android:layout_toRightOf="@+id/textView"
+        android:layout_toEndOf="@+id/textView"
         android:layout_alignParentTop="true" />
 
     <Button
@@ -34,7 +35,7 @@
         android:layout_below="@+id/editText"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textSize="60dp" />
+        android:textSize="60sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -45,7 +46,7 @@
         android:layout_below="@+id/button"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textSize="60dp" />
+        android:textSize="60sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -56,7 +57,7 @@
         android:layout_below="@+id/textPressure"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textSize="60dp" />
+        android:textSize="60sp" />
 
     <TextView
         android:layout_width="wrap_content"

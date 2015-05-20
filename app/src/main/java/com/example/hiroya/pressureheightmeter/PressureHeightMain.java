@@ -6,35 +6,32 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
 
 public class PressureHeightMain extends Activity implements SensorEventListener{
 
-    SensorManager sensorManager;
+    private SensorManager sensorManager;
 
-    static final int filter_n = 250;
-    float[] prevPressure;
-    float currentPressure;
+    private static final int filter_n = 50;
+    private float[] prevPressure;
+    private float currentPressure;
 
-    boolean isZeroed; //基準点の測定が済んだかどうか
-    float refPressure; //基準点の気圧
-    float temperature; //気温
+    private boolean isZeroed; //基準点の測定が済んだかどうか
+    private float refPressure; //基準点の気圧
+    private float temperature; //気温
 
-    TextView textPressure;
-    TextView textHeight;
+    private TextView textPressure;
+    private TextView textHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -80,12 +77,13 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
         super.onResume();
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 
-        List<Sensor> sensores = sensorManager.getSensorList(Sensor.TYPE_PRESSURE);
-        if(sensores.size() == 0){
+        List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_PRESSURE);
+        if(sensors.size() == 0){
             textPressure.setText("?.?? hPa");
             return;
         }
-        sensorManager.registerListener(this, sensores.get(0), SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, sensors.get(0), SensorManager.SENSOR_DELAY_GAME);
+        Toast.makeText(this, "Registered", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -93,6 +91,7 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
         super.onPause();
         if(sensorManager != null){
             sensorManager.unregisterListener(this);
+            Toast.makeText(this, "Unregistered", Toast.LENGTH_SHORT).show();
             sensorManager = null;
         }
     }
