@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,23 +23,23 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
 
     private SensorManager sensorManager;
 
-    private static final int filter_n = 50;
-    private float[] prevPressure;
     private float currentPressure;
 
     private boolean isZeroed; //基準点の測定が済んだかどうか
     private float refPressure; //基準点の気圧
     private float temperature; //気温
+    private float filterStr; //フィルタの効き
 
     private TextView textPressure;
     private TextView textHeight;
+    private TextView textFilterStr;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pressure_height_main);
 
-        final Button b = (Button)findViewById(R.id.button);
+        final Button b = (Button) findViewById(R.id.button);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,12 +64,25 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
             public void afterTextChanged(Editable s){}
         });
 
+        ((SeekBar)findViewById(R.id.filterStrength)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+                filterStr = seekBar.getProgress() / 100.0f;
+                textFilterStr.setText(seekBar.getProgress() + "%");
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar){}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar){}
+        });
+
         textPressure = (TextView)findViewById(R.id.textPressure);
         textHeight = (TextView)findViewById(R.id.textHeight);
         textHeight.setText("?.?? m");
+        textFilterStr = (TextView)findViewById(R.id.textFilterStr);
 
-        prevPressure = new float[filter_n];
         temperature = 20.0f;
+        filterStr = 0.0f;
         isZeroed = false;
     }
 
@@ -83,7 +97,7 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
             return;
         }
         sensorManager.registerListener(this, sensors.get(0), SensorManager.SENSOR_DELAY_GAME);
-        Toast.makeText(this, "Registered", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Sensor ON", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -91,21 +105,14 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
         super.onPause();
         if(sensorManager != null){
             sensorManager.unregisterListener(this);
-            Toast.makeText(this, "Unregistered", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Sensor OFF", Toast.LENGTH_SHORT).show();
             sensorManager = null;
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent e){
-        System.arraycopy(prevPressure, 0, prevPressure, 1, filter_n - 1);
-        prevPressure[0] = e.values[0];
-
-        float sum = 0.0f;
-        for(int i = 0; i < filter_n; i++) {
-            sum += prevPressure[i];
-        }
-        currentPressure = sum / filter_n;
+        currentPressure = e.values[0] * (1.0f - filterStr) + currentPressure * filterStr;
         textPressure.setText(String.format("%.2f", currentPressure) + " hPa");
 
         if(isZeroed){ //基準点の測定が終わってたら高度を計算・表示
@@ -114,7 +121,7 @@ public class PressureHeightMain extends Activity implements SensorEventListener{
             if(Math.abs(height) > 1.0){
                 textHeight.setText(String.format("%+.2f", height) + " m");
             }else{
-                textHeight.setText(String.format("%+.2f", 100.0*height) + " cm");
+                textHeight.setText(String.format("%+.2f", 100.0 * height) + " cm");
             }
         }
    }
